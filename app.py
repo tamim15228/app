@@ -5,21 +5,18 @@ import rioxarray
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
-# === Load NetCDF ===
 @st.cache_data
 def load_co2_data():
-    path = r"G:\CNN_LSTM\predicted_CO2_2026_2036.nc"
+    path = r"G:\CNN_LSTM\predicted_CO2_2034.nc"
     ds = xr.open_dataset(path)
     return ds
 
-# === Load Country Shapes (from your local shapefile) ===
 @st.cache_data
 def load_country_shapes():
     shp_path = r"G:\CNN_LSTM\ne_110m_admin_0_countries (4)\ne_110m_admin_0_countries.shp"
     world = gpd.read_file(shp_path)
     return world
 
-# === Plot CO₂ clipped to country boundary ===
 def plot_co2_exact(ds, country_geom, selected_country, time_idx):
     co2_data = ds['predicted_CO2'].isel(time=time_idx)
 
@@ -52,24 +49,18 @@ def plot_co2_exact(ds, country_geom, selected_country, time_idx):
 
     st.pyplot(fig)
 
-# === Streamlit UI ===
 st.set_page_config(layout="wide")
-st.title("🌍 Future CO₂ Prediction App Made by Nuhana's Husband")
+st.title("Future CO₂ Prediction App")
 
-# Load data
 ds = load_co2_data()
 world = load_country_shapes()
 
-# Select country
 countries = world['NAME'].unique()
 selected_country = st.selectbox("Select a country", sorted(countries))
 
-# Get country geometry
 country_geom = world[world['NAME'] == selected_country].geometry
 
-# Select time index (adjust this if you have real years)
 time_len = ds.dims['time']
 time_idx = st.slider("Select year index (0 = 2026)", 0, time_len - 1, 0)
 
-# Plot
 plot_co2_exact(ds, country_geom, selected_country, time_idx)
